@@ -147,7 +147,7 @@ exports.signupResendOtp = async(req,res)=>{
             const mailOptions = {
                 from:process.env.NODE_MAILER_GMAIL,
                 to:client.email,
-                subject:'Welcome to Buildzy! Verify Your Account',
+                subject:'Welcome to Stream Bridge! Verify Your Account',
                 html: sentMail
             }
 
@@ -165,6 +165,42 @@ exports.signupResendOtp = async(req,res)=>{
     }
     catch(err){
         console.log('error on signupResendOtp',err);
+        res.status(500).json('Internal server error');
+    }
+}
+
+exports.forgotPassword = async(req,res)=>{
+    try{
+        const email=req.body.email
+        const client = await signupModel.findOne({email:email})
+        if(!client){
+            return res.status(400).json('user details not getting')
+        }
+        else{
+            const emailOtp = generateOtp()
+            const sentMail = await emailContent.resetPasswordOTP(emailOtp);
+            
+            const mailOptions = {
+                from:process.env.NODE_MAILER_GMAIL,
+                to:client.email,
+                subject: 'Stream Bridge Password Reset Request',
+                html: sentMail
+            }
+
+            nodemailer.sentMailOtp(mailOptions)
+
+            await signupModel.findOneAndUpdate(
+                {_id:client._id},
+                {
+                    otp:emailOtp
+                }
+            )
+            res.status(200).json({id:client._id,email:client.email})
+            
+        }
+    }
+    catch(err){
+        console.log('error on forgotPassword',err);
         res.status(500).json('Internal server error');
     }
 }
