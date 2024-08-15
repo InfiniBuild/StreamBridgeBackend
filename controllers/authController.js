@@ -133,3 +133,38 @@ exports.signupOtpVerification = async(req,res)=>{
     }
 }
 
+exports.signupResendOtp = async(req,res)=>{
+    try{
+        const id=req.body.id
+        const client = await signupModel.findOne({_id:id})
+        if(!client){
+            return res.status(400).json('user details not getting')
+        }
+        else{
+            const emailOtp = generateOtp()
+            const sentMail = await emailContent.generateEmailContent(emailOtp);
+            
+            const mailOptions = {
+                from:process.env.NODE_MAILER_GMAIL,
+                to:client.email,
+                subject:'Welcome to Buildzy! Verify Your Account',
+                html: sentMail
+            }
+
+            nodemailer.sentMailOtp(mailOptions)
+
+            await signupModel.findOneAndUpdate(
+                {_id:id},
+                {
+                    otp:emailOtp
+                }
+            )
+            res.status(200).json('otp resented')
+            
+        }
+    }
+    catch(err){
+        console.log('error on signupResendOtp',err);
+        res.status(500).json('Internal server error');
+    }
+}
