@@ -16,9 +16,9 @@ const client=require("./routes/clientRouter")
 app.use("/client",client)
 
 dbConnect().then(()=>{
-    app.listen((port,()=>{
+    app.listen(port,()=>{
         console.log(`server running on ${port}`);
-    }))
+    })
 }).catch((err)=>{
     console.error('Database connection failed:', err);
 })
