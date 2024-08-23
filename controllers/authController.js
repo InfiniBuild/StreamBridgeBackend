@@ -323,10 +323,10 @@ exports.login = async(req,res)=>{
                 const id = {id:client._id}
                 const jwtToken= jwt.sign(id,process.env.JWT_TOKEN_SECRET)
                 if(client.profile){
-                    res.status(200).json({token:jwtToken,profileImage:client.profile})    
+                    res.status(200).json({token:jwtToken,profileImage:client.profile,fullName:client.fullName})    
                 }
                 else{
-                    res.status(200).json({token:jwtToken})
+                    res.status(200).json({token:jwtToken,fullName:client.fullName})
                 }
             }
         }
